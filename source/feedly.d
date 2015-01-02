@@ -1,6 +1,86 @@
 module webapi.feedly;
 
-// not implemented: Microsoft, Facebook
+/***
+	Feedly API Client for the D Programming Language - written 2014 Laeeth Isharc
+
+	Pre-alpha stage.  Please report issues on GitHub.
+
+		not yet implemented: Microsoft, Facebook
+
+	struct FeedlyClient - methods
+
+		this(string clientID,string clientSecret)
+		void setSandbox(bool sandbox)
+		void setClientID(string clientID)
+		void setClientToken(string clientToken)
+		void setClientSecret(string clientSecret)
+		auto epochTime(DateTime dt)
+		string getCodeURI(string callbackURI)
+	    	string authenticateUser(string responseType, string redirectURI, string state)
+		string getAccessToken(string redirectURI,string code,string state)
+		string refreshAccessToken(string refreshToken)
+		string revokeAccessToken(string revokeToken)
+		string getCategories()
+		string updateCategoryLabel(string category, string newlabel)
+		string deleteCategory(string category)
+		string getFeedMetadata(string feedID)
+		string getFeedMetadata(string[] feedIDs)
+		string linkDropbox(string redirectURI, string state)
+		string unlinkDropbox()
+		string linkEvernote(string redirectURI, string state)
+		string unlinkEvernote()
+		string getEvernoteBookList()
+		string saveArticleEvernote(string notebookName, string[] tags, string entryID, string notebookType, string notebookGUID,
+		string getEntry(string entryID)
+		string getEntries(string[] entryIDs)
+		string createEntry(string title, string content, bool contentLeftToRight, string summary, bool summaryLeftToRight, 
+				string[]  enclosure,string[2][] alternate,DateTime crawled, DateTime published, DateTime updated)
+		string saveArticleDropbox(string entryID)
+		string getMixes(string streamID, int count, bool unreadOnly, int hours, DateTime newerThan, bool backFill, string locale)
+		string getOPML()
+		string postOPML(string opml)
+		string getPreferences()
+		string updatePreferences(string[string] preferences)
+		string getProfile()
+		string updateProfile(string email, string givenName, string familyName, string picture, bool gender, string locale, string twitter, string facebook)
+		string searchStreamContent(string streamID, string query)
+		string getUserSubscriptions()
+		string subscribeFeed(string ID, string title, string[2][] categories)
+		string updateSubscription(string ID, string title, string[2][] categories)
+		string unsubscribeFeed(string ID)
+	    	string getShortenedURL(string entryID)
+	    	string getFeedIDs(string streamID, int count, string ranked, bool unreadOnly, DateTime newerThan, int continuation)
+		string getFeedContent(string streamID, int count, string ranked, bool unreadOnly, DateTime newerThan, int continuation)
+		string getFeedUnreadCounts(bool autorefresh, DateTime newerThan, string streamID)
+		string getFeedUnreadCounts(bool autorefresh, string streamID)
+		string markArticlesAsRead(string[] entryIDs)
+		string markArticlesAsSaved(string[] entryIDs)
+		string markArticlesAsUnsaved(string[] entryIDs)
+		string getLatestRead(DateTime newerThan)
+		string getLatestTaggedEntries(DateTime newerThan)
+		string markArticlesAsUnread(string[] entryIDs)
+		string markFeedAsRead(string feedID, string lastReadEntryID)
+		string undoMarkFeedsAsRead(string[] feedIDs)
+		string markCategoriesAsRead(string[] categoryIDs, string lastReadEntryID)
+		string markCategoriesAsRead(string[] categoryIDs, DateTime asOf)
+		string undoMarkCategoriesAsRead(string[] categoryIDs)
+		string saveForLater(string[] entryIDs)
+		string searchFeeds(string query, int count, string locale)
+		string getTags()
+		string addTag(string[] tags, string[] entryIDs)
+		string changeTagLabel(string tag, string oldLabel, string newLabel)
+		string unTagEntries(string[] tags, string[] entryIDs)
+		string deleteTags(string[] tags)
+		string getTopics()
+		string addTopic(string topicID, string topicInterest)
+		string updateTopic(string topicID, string topicInterest)
+		string deleteTopic(string topicID)
+		string twitterSuggest1()
+		string twitterSuggest2(string[] twitterHandles)
+		string twitterUnlink()
+		string twitterLink(string redirectURI, string state)
+	
+*/
 
 import std.stdio;
 import std.conv;
@@ -31,14 +111,14 @@ struct FeedlyClient
  	string urlToken="/v3/auth/token";
 	string urlMarkers="/v3/markers";
 	string urlMixes="/v3/mixes";
-	string urlOPML="/v3/OPML";
+	string urlOPML="/v3/opml";
 	string urlPreferences="/v3/preferences";
 	string urlProfile="/v3/profile";
-//	string urlSaveForLater="/v3/tags/user%2F";
-	string urlSearchStream="/v3/search/";
+	string urlSaveForLater="/v3/tags/user%2F";
+	string urlSearchStream="/v3/search";
 	string urlSearchFeeds="/v3/search/feeds";
 	string urlStreams="/v3/streams";
-	string urlShorten = "/v3/shorten/entries/";
+	string urlShorten = "/v3/shorten/entries";
 	string urlSubscriptions = "/v3/subscriptions";
 	string urlTags="/v3/tags";
 	string urlTopics="/v3/topics";
@@ -631,15 +711,13 @@ struct FeedlyClient
 	string getOPML()
 	{
 		string url="https://"~baseURL~urlOPML;
-		auto jsonparam=Json.emptyObject;
-		
 		string ret;
-		auto jsonbody=to!string(serializeToJsonString(jsonparam));
+		auto jsonbody="";
 		requestHTTP(url,
 			(scope req)
 			{
-				req.contentType="application/json; charset=UTF8"; req.headers["Authorization"]="OAuth "~this.clientToken;
-				
+				req.contentType="application/json; charset=UTF8";
+				req.headers["Authorization"]="OAuth "~this.clientToken;
 				req.method = HTTPMethod.GET;
 				req.bodyWriter.write(jsonbody);
 			},
@@ -1347,7 +1425,7 @@ struct FeedlyClient
 		return ret;
 	}
                 
-/*
+
 	string saveForLater(string[] entryIDs)
 	{
 		string url="https://"~baseURL~urlSaveForLater~this.clientID~"%2Ftag%2Fglobal.saved";
@@ -1373,7 +1451,7 @@ struct FeedlyClient
 		);
 		return ret;
 	}
-*/
+
 	string searchFeeds(string query, int count, string locale)
 	{
 		string url="https://"~baseURL~urlSearchFeeds;
@@ -1646,8 +1724,8 @@ struct FeedlyClient
 		requestHTTP(url,
 			(scope req)
 			{
-				req.contentType="application/json; charset=UTF8"; req.headers["Authorization"]="OAuth "~this.clientToken;
-				
+				req.contentType="application/json; charset=UTF8";
+				req.headers["Authorization"]="OAuth "~this.clientToken;
 				req.method = HTTPMethod.POST;
 				req.bodyWriter.write(jsonbody);
 			},
