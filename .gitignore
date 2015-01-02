@@ -1,3 +1,8 @@
+test.d
+app.old
+app.d
+app
+app.o
 feedly
 .dub
 docs.json
