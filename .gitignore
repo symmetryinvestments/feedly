@@ -1,7 +1,6 @@
 source/tokens.d
 test.d
 app.old
-app.d
 app
 app.o
 feedly
