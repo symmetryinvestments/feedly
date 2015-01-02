@@ -1,6 +1,6 @@
 {
-	"name": "feedly",
-	"description": "A simple vibe.d server application.",
+	"name": "d_feedly",
+	"description": "API for Feedly RSS service",
 	"copyright": "Laeeth Isharc",
 	"license": "public domain",
 	"authors": ["Laeeth Isharc"],
